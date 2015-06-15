@@ -24,15 +24,6 @@ describe "Module#attr_reader" do
     o.send(:b).should == "test2"
   end
 
-  it "allows for adding an attr_reader to an immediate" do
-    class TrueClass
-      attr_reader :spec_attr_reader
-    end
-
-    true.instance_variable_set("@spec_attr_reader", "a")
-    true.spec_attr_reader.should == "a"
-  end
-
   it "converts non string/symbol/fixnum names to strings using to_str" do
     (o = mock('test')).should_receive(:to_str).any_number_of_times.and_return("test")
     c = Class.new do

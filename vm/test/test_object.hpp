@@ -14,6 +14,22 @@ public:
     destroy();
   }
 
+  void test_is_taintable_p() {
+    TS_ASSERT(!cNil->is_taintable_p());
+    TS_ASSERT(!cTrue->is_taintable_p());
+    TS_ASSERT(!cFalse->is_taintable_p());
+    TS_ASSERT(!state->symbol("asd")->is_taintable_p());
+    TS_ASSERT(!Fixnum::from(1)->is_taintable_p());
+    TS_ASSERT(!Bignum::from(state, (native_int)13)->is_taintable_p());
+    TS_ASSERT(!Float::create(state, 15.0)->is_taintable_p());
+
+    TS_ASSERT(String::create(state, "blah")->is_taintable_p());
+  }
+
+  void test_freeze_taintables() {
+
+  }
+
   void test_kind_of() {
     Object* obj = util_new_object();
     TS_ASSERT(kind_of<Object>(obj));
@@ -323,6 +339,39 @@ public:
     TS_ASSERT_EQUALS(obj->tainted_p(state), cFalse);
     obj->taint(state);
     TS_ASSERT_EQUALS(obj->tainted_p(state), cTrue);
+
+
+    TS_ASSERT_EQUALS(cFalse, cNil->tainted_p(state));
+    cNil->taint(state);
+    TS_ASSERT_EQUALS(cFalse, cNil->tainted_p(state));
+
+    TS_ASSERT_EQUALS(cFalse, cTrue->tainted_p(state));
+    cTrue->taint(state);
+    TS_ASSERT_EQUALS(cFalse, cTrue->tainted_p(state));
+
+    TS_ASSERT_EQUALS(cFalse, cFalse->tainted_p(state));
+    cFalse->taint(state);
+    TS_ASSERT_EQUALS(cFalse, cFalse->tainted_p(state));
+
+    Object* sym = state->symbol("asd");
+    TS_ASSERT_EQUALS(cFalse, sym->tainted_p(state));
+    sym->taint(state);
+    TS_ASSERT_EQUALS(cFalse, sym->tainted_p(state));
+
+    Object* fixnum = Fixnum::from(1);
+    TS_ASSERT_EQUALS(cFalse, fixnum->tainted_p(state));
+    fixnum->taint(state);
+    TS_ASSERT_EQUALS(cFalse, fixnum->tainted_p(state));
+
+    Object* Bignum = Bignum::from(state, (native_int)13);
+    TS_ASSERT_EQUALS(cFalse, Bignum->tainted_p(state));
+    Bignum->taint(state);
+    TS_ASSERT_EQUALS(cFalse, Bignum->tainted_p(state));
+
+    Object* _float = Float::create(state, 15.0);
+    TS_ASSERT_EQUALS(cFalse, _float->tainted_p(state));
+    _float->taint(state);
+    TS_ASSERT_EQUALS(cFalse, _float->tainted_p(state));
   }
 
   void test_untaint() {
@@ -332,6 +381,73 @@ public:
     TS_ASSERT_EQUALS(obj->tainted_p(state), cTrue);
     obj->untaint(state);
     TS_ASSERT_EQUALS(obj->tainted_p(state), cFalse);
+
+
+    TS_ASSERT_EQUALS(cFalse, cNil->tainted_p(state));
+    cNil->untaint(state);
+    TS_ASSERT_EQUALS(cFalse, cNil->tainted_p(state));
+
+    TS_ASSERT_EQUALS(cFalse, cTrue->tainted_p(state));
+    cTrue->untaint(state);
+    TS_ASSERT_EQUALS(cFalse, cTrue->tainted_p(state));
+
+    TS_ASSERT_EQUALS(cFalse, cFalse->tainted_p(state));
+    cFalse->untaint(state);
+    TS_ASSERT_EQUALS(cFalse, cFalse->tainted_p(state));
+
+    Object* sym = state->symbol("asd");
+    TS_ASSERT_EQUALS(cFalse, sym->tainted_p(state));
+    sym->untaint(state);
+    TS_ASSERT_EQUALS(cFalse, sym->tainted_p(state));
+
+    Object* fixnum = Fixnum::from(1);
+    TS_ASSERT_EQUALS(cFalse, fixnum->tainted_p(state));
+    fixnum->untaint(state);
+    TS_ASSERT_EQUALS(cFalse, fixnum->tainted_p(state));
+
+    Object* Bignum = Bignum::from(state, (native_int)13);
+    TS_ASSERT_EQUALS(cFalse, Bignum->tainted_p(state));
+    Bignum->untaint(state);
+    TS_ASSERT_EQUALS(cFalse, Bignum->tainted_p(state));
+
+    Object* _float = Float::create(state, 15.0);
+    TS_ASSERT_EQUALS(cFalse, _float->tainted_p(state));
+    _float->untaint(state);
+    TS_ASSERT_EQUALS(cFalse, _float->tainted_p(state));
+  }
+
+  void test_untrust() {
+    TS_ASSERT_EQUALS(cFalse, cNil->untrusted_p(state));
+    cNil->untrust(state);
+    TS_ASSERT_EQUALS(cFalse, cNil->untrusted_p(state));
+
+    TS_ASSERT_EQUALS(cFalse, cTrue->untrusted_p(state));
+    cTrue->untrust(state);
+    TS_ASSERT_EQUALS(cFalse, cTrue->untrusted_p(state));
+
+    TS_ASSERT_EQUALS(cFalse, cFalse->untrusted_p(state));
+    cFalse->untrust(state);
+    TS_ASSERT_EQUALS(cFalse, cFalse->untrusted_p(state));
+
+    Object* sym = state->symbol("asd");
+    TS_ASSERT_EQUALS(cFalse, sym->untrusted_p(state));
+    sym->untrust(state);
+    TS_ASSERT_EQUALS(cFalse, sym->untrusted_p(state));
+
+    Object* fixnum = Fixnum::from(1);
+    TS_ASSERT_EQUALS(cFalse, fixnum->untrusted_p(state));
+    fixnum->untrust(state);
+    TS_ASSERT_EQUALS(cFalse, fixnum->untrusted_p(state));
+
+    Object* Bignum = Bignum::from(state, (native_int)13);
+    TS_ASSERT_EQUALS(cFalse, Bignum->untrusted_p(state));
+    Bignum->untrust(state);
+    TS_ASSERT_EQUALS(cFalse, Bignum->untrusted_p(state));
+
+    Object* _float = Float::create(state, 15.0);
+    TS_ASSERT_EQUALS(cFalse, _float->untrusted_p(state));
+    _float->untrust(state);
+    TS_ASSERT_EQUALS(cFalse, _float->untrusted_p(state));
   }
 
   void test_frozen_p() {
@@ -340,6 +456,14 @@ public:
     TS_ASSERT_EQUALS(obj->frozen_p(state), cFalse);
     obj->freeze(state);
     TS_ASSERT_EQUALS(obj->frozen_p(state), cTrue);
+
+    TS_ASSERT_EQUALS(cTrue, cNil->frozen_p(state));
+    TS_ASSERT_EQUALS(cTrue, cTrue->frozen_p(state));
+    TS_ASSERT_EQUALS(cTrue, cFalse->frozen_p(state));
+    TS_ASSERT_EQUALS(cTrue, state->symbol("asd")->frozen_p(state));
+    TS_ASSERT_EQUALS(cTrue, Fixnum::from(1)->frozen_p(state));
+    TS_ASSERT_EQUALS(cTrue, Bignum::from(state, (native_int)13)->frozen_p(state));
+    TS_ASSERT_EQUALS(cTrue, Float::create(state, 15.0)->frozen_p(state));
   }
 
   void test_freeze() {

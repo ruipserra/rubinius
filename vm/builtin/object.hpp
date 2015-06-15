@@ -322,6 +322,8 @@ namespace rubinius {
     /** Shorter indented String describing this object (through TypeInfo.) */
     Object*   show_simple(STATE, int level);
 
+    bool      is_taintable_p();
+
     /**
      *  Set tainted flag on this object.
      */

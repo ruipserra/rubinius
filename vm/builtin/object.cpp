@@ -167,9 +167,7 @@ namespace rubinius {
   Object* Object::frozen_p(STATE) {
     if(reference_p()) {
       return RBOOL(is_frozen_p());
-    } else if(try_as<Symbol>(this)) {
-      return cTrue;
-    } else if(try_as<Fixnum>(this)) {
+    } else if(!is_taintable_p()) {
       return cTrue;
     } else {
       LookupTable* tbl = try_as<LookupTable>(G(external_ivars)->fetch(state, this));
@@ -788,10 +786,15 @@ namespace rubinius {
     return cNil;
   }
 
+  bool Object::is_taintable_p() {
+    return reference_p() && !instance_of<Bignum>(this) && !instance_of<Float>(this);
+    //return !nil_p() && !true_p() && !false_p() && !fixnum_p() && !symbol_p() && !instance_of<Bignum>(this) && !instance_of<Float>(this);
+  }
+
   Object* Object::taint(STATE) {
-    if(!is_tainted_p()) {
+    if(is_taintable_p() && !is_tainted_p()) {
       check_frozen(state);
-      if(reference_p()) set_tainted();
+      set_tainted();
     }
     return this;
   }
@@ -809,9 +812,9 @@ namespace rubinius {
   }
 
   Object* Object::untrust(STATE) {
-    if(!is_untrusted_p()) {
+    if(is_taintable_p() && !is_untrusted_p()) {
       check_frozen(state);
-      if(reference_p()) set_untrusted();
+      set_untrusted();
     }
     return this;
   }

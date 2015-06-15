@@ -29,22 +29,20 @@ describe "Rubinius::Type.infect" do
     end
   end
 
-  ruby_version_is "2.1" do
-    it "raises a RuntimeError for Fixnum" do
-      lambda { Rubinius::Type.infect(1,  @tainted) }.should raise_error(RuntimeError)
-    end
+  it "is a no-op for Fixnum" do
+    Rubinius::Type.infect(1,  @tainted).tainted?.should be_false
+  end
 
-    it "raises a RuntimeError for Bignum" do
-      lambda { Rubinius::Type.infect(bignum_value,  @tainted) }.should raise_error(RuntimeError)
-    end
+  it "is a no-op for Bignum" do
+    Rubinius::Type.infect(bignum_value,  @tainted).tainted?.should be_false
+  end
 
-    it "raises a RuntimeError for Float" do
-      lambda { Rubinius::Type.infect(2.0,  @tainted) }.should raise_error(RuntimeError)
-    end
+  it "is a no-op for Float" do
+    Rubinius::Type.infect(2.0,  @tainted).tainted?.should be_false
+  end
 
-    it "raises a RuntimeError for Symbol" do
-      lambda { Rubinius::Type.infect(:a,  @tainted) }.should raise_error(RuntimeError)
-    end
+  it "is a no-op for Symbol" do
+    Rubinius::Type.infect(:a,  @tainted).tainted?.should be_false
   end
 
   it "is a no-op for true" do

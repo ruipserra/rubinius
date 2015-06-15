@@ -10,19 +10,21 @@ describe "Kernel#untrusted?" do
   end
 
   it "has no effect on immediate values" do
-    a = nil
-    b = true
-    c = false
-    a.untrust
-    b.untrust
-    c.untrust
-    a.untrusted?.should == false
-    b.untrusted?.should == false
-    c.untrusted?.should == false
+    [nil, true, false, 1, :a].each do |obj|
+      obj.untrust
+      obj.untrusted?.should == false
+    end
   end
 
-  it "has no effect on immediate values" do
-    d = 1
-    lambda { d.untrust }.should raise_error(RuntimeError)
+  it "has no effect on floats" do
+    obj = 1.1
+    obj.untrust
+    obj.untrusted?.should == false
+  end
+
+  it "has no effect on bignums" do
+    obj = bignum_value
+    obj.untrust
+    obj.untrusted?.should == false
   end
 end

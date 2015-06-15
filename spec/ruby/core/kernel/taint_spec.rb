@@ -24,57 +24,21 @@ describe "Kernel#taint" do
   end
 
   it "has no effect on immediate values" do
-    [nil, true, false].each do |v|
+    [nil, true, false, 1, :a].each do |v|
       v.taint
       v.tainted?.should == false
     end
   end
 
-  describe "on a Fixnum" do
-    before(:each) do
-      @fixnum = 1
-    end
-
-    it "raises a RuntimeError" do
-      lambda { @fixnum.taint }.should raise_exception(RuntimeError)
-    end
+  it "has no effect on Float" do
+    obj = 1.1
+    obj.taint
+    obj.tainted?.should == false
   end
 
-  describe "on a Bignum" do
-    before(:each) do
-      @bignum = bignum_value
-    end
-
-    after(:each) do
-      @bignum.untaint if @bignum.tainted?
-    end
-
-    it "raises a RuntimeError" do
-      lambda { @bignum.taint }.should raise_exception(RuntimeError)
-    end
-  end
-
-  describe "on a Float" do
-    before(:each) do
-      @float = 0.1
-    end
-
-    after(:each) do
-      @float.untaint if @float.tainted?
-    end
-
-    it "raises a RuntimeError" do
-      lambda { @float.taint }.should raise_exception(RuntimeError)
-    end
-  end
-
-  describe "on a Symbol" do
-    before(:each) do
-      @symbol = :symbol
-    end
-
-    it "raises a RuntimeError" do
-      lambda { @symbol.taint }.should raise_exception(RuntimeError)
-    end
+  it "has no effect on Bignum" do
+    obj = bignum_value
+    obj.taint
+    obj.tainted?.should == false
   end
 end
