@@ -73,7 +73,6 @@ namespace rubinius {
     TypedRoot<Class*> exc_loe, exc_type, exc_rex, exc_rte;
     TypedRoot<Class*> exc_primitive_failure;
 
-    TypedRoot<LookupTable*> external_ivars;
     TypedRoot<LookupTable*> errno_mapping;
     TypedRoot<Object*> config;
     TypedRoot<Symbol*> sym_send;
@@ -204,7 +203,6 @@ namespace rubinius {
       exc_rex(&roots),
       exc_rte(&roots),
       exc_primitive_failure(&roots),
-      external_ivars(&roots),
       errno_mapping(&roots),
       config(&roots),
       sym_send(&roots),

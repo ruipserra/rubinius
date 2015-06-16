@@ -417,12 +417,6 @@ namespace rubinius {
     VariableScope::bootstrap_methods(state);
     BlockEnvironment::bootstrap_methods(state);
 
-    /*
-     * Setup the table we use to store ivars for immediates
-     */
-
-    GO(external_ivars).set(LookupTable::create(state));
-
     initialize_platform_data(state);
   }
 

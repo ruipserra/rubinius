@@ -535,8 +535,12 @@ Object* const cUndef = reinterpret_cast<Object*>(0x22L);
 
     void set_frozen(int val=1);
 
+    bool is_taintable_p() const {
+      return reference_p() && !check_type(BignumType) && !check_type(FloatType);
+    }
+
     bool is_tainted_p() const {
-      if(reference_p()) {
+      if(is_taintable_p()) {
         return flags().Tainted == 1;
       }
       return false;
@@ -545,7 +549,7 @@ Object* const cUndef = reinterpret_cast<Object*>(0x22L);
     void set_tainted(int val=1);
 
     bool is_untrusted_p() const {
-      if(reference_p()) {
+      if(is_taintable_p()) {
         return flags().Untrusted == 1;
       }
       return false;

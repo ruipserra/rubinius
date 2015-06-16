@@ -224,39 +224,10 @@ public:
     TS_ASSERT_EQUALS(obj->get_ivar(state, sym), Fixnum::from(5));
   }
 
-  void test_set_ivar_on_immediate() {
-    size_t size = COMPACTLOOKUPTABLE_SIZE / 2 + 2;
-    Object* obj = Fixnum::from(-10);
-    Symbol* sym;
-
-    for(size_t i = 0; i < size; i++) {
-      std::ostringstream name;
-      name << "@test" << i;
-      sym = state->symbol(name.str().c_str());
-      obj->set_ivar(state, sym, Fixnum::from(i));
-    }
-
-    sym = state->symbol("@test5");
-    TS_ASSERT_EQUALS(obj->get_ivar(state, sym), Fixnum::from(5));
-  }
-
   void test_get_ivar() {
     Symbol* sym = state->symbol("@test");
     Object* val = Fixnum::from(33);
     Object* obj = util_new_object();
-
-    TS_ASSERT_EQUALS(cNil, obj->get_ivar(state, state->symbol("@non_existent")));
-    TS_ASSERT_EQUALS(cNil, obj->get_ivar(state, sym));
-
-    obj->set_ivar(state, sym, val);
-
-    TS_ASSERT_EQUALS(val, obj->get_ivar(state, sym));
-  }
-
-  void test_get_ivar_on_immediate() {
-    Symbol* sym = state->symbol("@test");
-    Object* val = Fixnum::from(33);
-    Object* obj = Fixnum::from(-10);
 
     TS_ASSERT_EQUALS(cNil, obj->get_ivar(state, state->symbol("@non_existent")));
     TS_ASSERT_EQUALS(cNil, obj->get_ivar(state, sym));

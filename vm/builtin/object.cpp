@@ -151,29 +151,16 @@ namespace rubinius {
   Object* Object::freeze(STATE) {
     if(reference_p()) {
       set_frozen();
-    } else {
-      LookupTable* tbl = try_as<LookupTable>(G(external_ivars)->fetch(state, this));
-
-      if(!tbl) {
-        tbl = LookupTable::create(state);
-        G(external_ivars)->store(state, this, tbl);
-      }
-      tbl->set_frozen();
     }
-
     return this;
   }
 
   Object* Object::frozen_p(STATE) {
     if(reference_p()) {
       return RBOOL(is_frozen_p());
-    } else if(!is_taintable_p()) {
-      return cTrue;
     } else {
-      LookupTable* tbl = try_as<LookupTable>(G(external_ivars)->fetch(state, this));
-      return RBOOL(tbl && tbl->is_frozen_p());
+      return cTrue;
     }
-    return cFalse;
   }
 
   void Object::check_frozen(STATE) {
@@ -216,12 +203,7 @@ namespace rubinius {
   }
 
   Object* Object::get_ivar(STATE, Symbol* sym) {
-    /* Implements the external ivars table for objects that don't
-       have their own space for ivars. */
     if(!reference_p()) {
-      LookupTable* tbl = try_as<LookupTable>(G(external_ivars)->fetch(state, this));
-
-      if(tbl) return tbl->fetch(state, sym);
       return cNil;
     }
 
@@ -270,17 +252,8 @@ namespace rubinius {
   }
 
   Object* Object::ivar_defined(STATE, Symbol* sym) {
-    /* Implements the external ivars table for objects that don't
-       have their own space for ivars. */
     if(!reference_p()) {
-      LookupTable* tbl = try_as<LookupTable>(G(external_ivars)->fetch(state, this));
-
-      if(tbl) {
-        bool found = false;
-        tbl->fetch(state, sym, &found);
-        return RBOOL(found);
-      }
-
+      // Immediates don't hold instance variables
       return cFalse;
     }
 
@@ -314,11 +287,8 @@ namespace rubinius {
     } match;
 
     if(!reference_p()) {
-      LookupTable* tbl = try_as<LookupTable>(G(external_ivars)->fetch(state, this));
-      if(tbl) {
-        tbl->filtered_keys(state, match, ary);
-      }
-      return ary;
+      // Immediates don't hold instance variables
+      return Array::create(state, 0);
     }
 
     // Handle packed objects in a unique way.
@@ -602,19 +572,6 @@ namespace rubinius {
   }
 
   Object* Object::set_ivar(STATE, Symbol* sym, Object* val) {
-    /* Implements the external ivars table for objects that don't
-       have their own space for ivars. */
-    if(!reference_p()) {
-      LookupTable* tbl = try_as<LookupTable>(G(external_ivars)->fetch(state, this));
-
-      if(!tbl) {
-        tbl = LookupTable::create(state);
-        G(external_ivars)->store(state, this, tbl);
-      }
-      tbl->store(state, sym, val);
-      return val;
-    }
-
     switch(type_id()) {
     case Object::type:
       return set_table_ivar(state, sym, val);
@@ -651,21 +608,9 @@ namespace rubinius {
   }
 
   Object* Object::del_ivar(STATE, Symbol* sym) {
-    LookupTable* tbl;
+    check_frozen(state);
+
     bool removed = false;
-
-    /* Implements the external ivars table for objects that don't
-       have their own space for ivars. */
-    if(!reference_p()) {
-      tbl = try_as<LookupTable>(G(external_ivars)->fetch(state, this));
-
-      if(tbl) {
-        Object* val = tbl->remove(state, sym, &removed);
-        if(removed) return val;
-      }
-
-      return Primitives::failure();
-    }
 
     // Handle packed objects in a unique way.
     if(PackedObject* po = try_as<PackedObject>(this)) {
@@ -786,11 +731,6 @@ namespace rubinius {
     return cNil;
   }
 
-  bool Object::is_taintable_p() {
-    return reference_p() && !instance_of<Bignum>(this) && !instance_of<Float>(this);
-    //return !nil_p() && !true_p() && !false_p() && !fixnum_p() && !symbol_p() && !instance_of<Bignum>(this) && !instance_of<Float>(this);
-  }
-
   Object* Object::taint(STATE) {
     if(is_taintable_p() && !is_tainted_p()) {
       check_frozen(state);
@@ -804,7 +744,7 @@ namespace rubinius {
   }
 
   Object* Object::trust(STATE) {
-    if(is_untrusted_p()) {
+    if(is_taintable_p() && is_untrusted_p()) {
       check_frozen(state);
       set_untrusted(0);
     }
@@ -828,9 +768,9 @@ namespace rubinius {
   }
 
   Object* Object::untaint(STATE) {
-    if(is_tainted_p()) {
+    if(is_taintable_p() && is_tainted_p()) {
       check_frozen(state);
-      if(reference_p()) set_tainted(0);
+      set_tainted(0);
     }
     return this;
   }
